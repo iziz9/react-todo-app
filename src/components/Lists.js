@@ -1,52 +1,61 @@
 import React from 'react'
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
+import List from './List'
 
-const Lists = ({ todoData, setTodoData }) => {
-  const btnStyle = {
-    color: "#fff",
-    border: "none",
-    padding: '5px 9px',
-    borderRadius: '50%',
-    cursor: "pointer",
-    float: 'right'
-  }
+const Lists = React.memo(({ todoData, setTodoData }) => {
 
-  const listStyle = (completed) => {
-    return {
-      padding: '10px',
-      borderBottom: '1px dotted #ccc',
-      textDecoration: completed ? 'line-through' : 'none'
-    }
-  }
+  console.log('lists is rendering')
 
-  const handleClick = (id) => {
-    let newTodoData = todoData.filter((data) => data.id !== id)
+  const handleEnd = (result) => {
+    console.log(result)
+
+    if (!result.destination) return;
+
+    const newTodoData = [...todoData];
+
+    // 변경시킬 아이템 지우고 return값으로 지워진 아이템을 잡아줌
+    const [reorderdItem] = newTodoData.splice(result.source.index, 1)
+
+    // 원하는 자리에 reorderedItem을 넣어줌
+    newTodoData.splice(result.destination.index, 0, reorderdItem)
     setTodoData(newTodoData)
   }
 
-  const handleCompletedChange = (id) => {
-    const newTodoData = todoData.map(data => {
-      if (data.id === id) {
-        data.completed = !data.completed
-      }
-      return data
-    })
-    setTodoData(newTodoData)
-  }
   return (
     <div>
-      {todoData.map(data => (
-        <div style={listStyle(data.completed)} key={data.id}>
-          <input
-            type="checkbox"
-            defaultChecked={data.completed}
-            onChange={() => handleCompletedChange(data.id)}
-          />
-          {data.title}
-          <button style={btnStyle} onClick={() => handleClick(data.id)}>❌</button>
-        </div>
-      ))}
+      <DragDropContext onDragEnd={handleEnd}>
+        <Droppable droppableId="to-dos">
+          {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+              {
+                todoData.map((data, index) => (
+                  <Draggable
+                    key={data.id}
+                    draggableId={data.id.toString()}
+                    index={index}
+                  >
+
+                    {(provided, snapshot) => (
+                      <List
+                        id={data.id}
+                        title={data.title}
+                        completed={data.completed}
+                        todoData={todoData}
+                        setTodoData={setTodoData}
+                        provided={provided}
+                        snapshot={snapshot}
+                      />
+                    )}
+                  </Draggable>
+                ))
+              }
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     </div>
   )
-}
+})
 
 export default Lists
