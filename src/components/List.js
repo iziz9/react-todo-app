@@ -7,6 +7,7 @@ const List = React.memo(({ id, title, completed, todoData, setTodoData, provided
 
   const handleClick = (id) => {
     let newTodoData = todoData.filter((data) => data.id !== id)
+    localStorage.setItem("todoData", JSON.stringify(newTodoData))
     setTodoData(newTodoData)
   }
 
@@ -20,20 +21,42 @@ const List = React.memo(({ id, title, completed, todoData, setTodoData, provided
     setTodoData(newTodoData)
   }
 
+  const handleEditChange = (e) => {
+    setEditedTitle(e.target.value);
+  }
+
+  const handleSubmit = () => {
+    let newTodoData = todoData.map(data => {
+      if (data.id === id) {
+        data.title = editedTitle;
+      }
+      return data;
+    });
+    setTodoData(newTodoData);
+    localStorage.setItem('todoData', JSON.stringify(newTodoData));
+    setIsEditing(false);
+  }
+
+
   if (isEditing) {
     return (
       <div className='flex items-center justify-between w-full px-4'>
         <form>
           <input
             className='w-full px-3 py-2 mr-4 text-gray-500'
-            value={editedTitle} autoFocus />
+            value={editedTitle}
+            autoFocus
+            onChange={handleEditChange} />
           <div>
             <button
               className='px-4 py-2 float-right'
               onClick={() => setIsEditing(false)}>X</button>
             <button
               className='px-4 py-2 float-right'
-              type="submit">Save</button>
+              type="submit"
+              onClick={handleSubmit}>
+              Save
+            </button>
           </div>
         </form>
       </div>

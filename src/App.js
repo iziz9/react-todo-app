@@ -5,23 +5,12 @@ import Form from './components/Form'
 
 export default function App() {
   console.log('App is rendering')
-  const [todoData, setTodoData] = useState([
-    {
-      id: '1',
-      title: "공부하기",
-      completed: true
-    },
-    {
-      id: '2',
-      title: "청소하기",
-      completed: false
-    },
-    {
-      id: '3',
-      title: "잠 자기",
-      completed: true
-    }
-  ])
+
+  const initialTodoData = localStorage.getItem('todoData')
+    ? JSON.parse(localStorage.getItem('todoData'))
+    : [];
+
+  const [todoData, setTodoData] = useState(initialTodoData)
   const [value, setValue] = useState('')
 
   const handleSubmit = (e) => {
@@ -32,6 +21,7 @@ export default function App() {
       completed: false
     }
     setTodoData(previous => [...previous, newTodoData])
+    localStorage.setItem('todoData', JSON.stringify([...todoData, newTodoData]))
     setValue("")
   }
 
